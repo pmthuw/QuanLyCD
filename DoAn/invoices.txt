@@ -1,12 +1,1 @@
-HD001|20/06/2026|Ta Truc|CD001|Noi nay co anh|3|20000|60000
-============================================================
-HOA DON BAN HANG: HD001
-Ngay lap    : 20/06/2026
-Khach hang  : Ta Truc
-Ma CD       : CD001
-Ten CD      : Noi nay co anh
-So luong    : 3
-Don gia     : 20,000 VNĐ
-Thanh tien  : 60,000 VNĐ
-============================================================
-
+HD001|22/06/2026|Thư|CD001|Cầu Vồng|2|15000|30000
