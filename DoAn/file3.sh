@@ -1,5 +1,5 @@
 #!/bin/bash
-
+CD_FILE="file.txt"
 # ===== e. TÌM KIẾM CD THEO THỂ LOẠI =====
 tim_cd_the_loai() {
     clear
