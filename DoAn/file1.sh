@@ -53,6 +53,20 @@ ThemThongTinCD() {
             fi
         done
     
+    while true
+        do
+            echo "Hãy nhập số lượng tồn kho:"
+            read so_luong
+            
+            #Cho phép số lượng phải là số thứ tự
+            if [[ "$so_luong" =~ ^[0-9]+$ ]]
+                then echo "Số lượng hợp lệ."
+            break
+            else
+                echo "Số lượng không hợp lệ. Hãy nhập lại."
+            fi
+        done
+
     echo "Hãy nhập danh sách bài hát của CD:"
     read ds_bai_hat
 }
@@ -83,7 +97,7 @@ case $Chon in
         grep -v "^$maCD|" file.txt > temp.txt
 
         #Tạo dòng có mã đã nhập và cập nhật thông tin đầy đủ
-        echo "$maCD|$tenCD|$tenTG|$the_loai|$gia|$ds_bai_hat" >> temp.txt
+        echo "$maCD|$tenCD|$tenTG|$the_loai|$gia|$so_luong|$ds_bai_hat" >> temp.txt
 
         #Đổi tên và cập nhật thành công
         mv temp.txt file.txt
