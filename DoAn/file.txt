@@ -1,5 +1,5 @@
 
-CD001|Cầu Vồng|Mưa|Nhạc Trẻ|15000|Mây,Trời
-CD002|Sinh Nhật|Phan Đình Phùng|Thiếu Nhi|200000|Happy Birthday
-CD003|Balabala|Mini|Hài|100000|Hehehehehe
-CD004|Nhà|Vui|Nhạc Trẻ|250000|Em Bé,Gia Đình
+CD001|Cầu Vồng|Mưa|Nhạc Trẻ|15000|30|Mây,Trời
+CD002|Sinh Nhật|Phan Đình Phùng|15|Thiếu Nhi|200000|Happy Birthday
+CD003|Balabala|Mini|Hài|100000|22|Hehehehehe
+CD004|Nhà|Vui|Nhạc Trẻ|250000|33|Em Bé,Gia Đình
