@@ -28,16 +28,16 @@ if [ "$lua_chon" -eq 1 ]; then
     # ==========================================================
     # CHẾ ĐỘ 1: XEM NGẮN GỌN (Dạng bảng 3 cột)
     # ==========================================================
-    printf "%-12s | %-25s | %-12s\n" "Ma CD" "Ten CD" "Gia"
+   printf "%-12s | %-25s | %-12s | %-8s\n" \ "Ma CD" "Ten CD" "Gia" "Ton kho"
     echo "--------------------------------------------------------"
    
     #Thứ tự biến phải khớp với thứ tự cột trong file dữ liệu
-    while IFS="|" read -r maCD tenCD tenTG the_loai gia ds_bai_hat
+    while IFS="|" read -r maCD tenCD tenTG the_loai gia sl ds_bai_hat
     do
         [ -z "$maCD" ] && continue
         
         # Gọi dấu $ theo tên biến mới
-        printf "%-12s | %-25s | %-12s\n" "$maCD" "$tenCD" "$gia"
+       printf "%-12s | %-25s | %-12s | %-8s\n" \ "$maCD" "$tenCD" "$gia" "$sl"
         
     done < "$FILE_DATA"
     echo "--------------------------------------------------------"
@@ -49,7 +49,7 @@ elif [ "$lua_chon" -eq 2 ]; then
     stt=1
     
     # Đổi tên biến trong lệnh read tương tự chế độ 1
-    while IFS="|" read -r maCD tenCD tenTG the_loai gia ds_bai_hat
+   while IFS="|" read -r maCD tenCD tenTG the_loai gia sl ds_bai_hat
     do
         [ -z "$maCD" ] && continue
         
@@ -59,6 +59,7 @@ elif [ "$lua_chon" -eq 2 ]; then
         echo "The loai: $the_loai"
         echo "Tac gia: $tenTG"
         echo "Gia ban: $gia"
+        echo "So luong ton kho: $sl"
         echo "Danh sach bai hat:"
         
         if [ -z "$ds_bai_hat" ]; then
