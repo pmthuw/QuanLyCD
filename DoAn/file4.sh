@@ -1,3 +1,4 @@
+#!/bin/bash
 # h. BAN CD
 sinh_id_hoa_don() {
     if [ ! -s "$INVOICE_FILE" ]; then
