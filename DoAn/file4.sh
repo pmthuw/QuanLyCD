@@ -1,141 +1,137 @@
 #!/bin/bash
-# h. BAN CD
-sinh_id_hoa_don() {
+# 1. Dinh nghia ten file du lieu
+FILE_DATA="file.txt"
+INVOICE_FILE="invoices.txt"
+
+# 2. KIEM TRA DIEU KIEN DAU VAO
+if [ ! -f "$FILE_DATA" ]; then
+    echo "Loi: Khong tim thay file du lieu $FILE_DATA!"
+    exit 1
+fi
+if [ ! -s "$FILE_DATA" ]; then
+    echo "-> Kho dang trong."
+    exit 0
+fi
+
+# 3. HAM SINH MA HOA DON TU DONG (HD001, HD002, ...)
+sinh_ma_hoa_don() {
     if [ ! -s "$INVOICE_FILE" ]; then
         echo "HD001"
-    else
-        last=$(awk -F'|' '/^HD[0-9]+\|/ {print $1}' "$INVOICE_FILE" | grep -oE '[0-9]+' | sort -n | tail -1)
-        [ -z "$last" ] && last=0
-        printf "HD%03d" $((last + 1))
+        return
     fi
+    last=$(grep -oE '^HD[0-9]+' "$INVOICE_FILE" | grep -oE '[0-9]+' | sort -n | tail -1)
+    [ -z "$last" ] && last=0
+    printf "HD%03d\n" $((last + 1))
 }
 
-cap_nhat_so_luong_cd() {
-    local ma_cd="$1"
-    local so_luong_moi="$2"
-    local tmp_file="${CD_FILE}.tmp.$$"
-
-    awk -F'|' -v OFS='|' -v id="$ma_cd" -v sl="$so_luong_moi" '
-        $1 == id {$7 = sl}
-        {print}
-    ' "$CD_FILE" > "$tmp_file" && mv "$tmp_file" "$CD_FILE"
-}
-
+# 4. HAM BAN CD
 ban_cd() {
-    clear
-    double_line
-    echo -e "${BOLD}${BLUE}        BAN CD${NC}"
-    double_line
+    echo -n "Nhap ma CD can ban: "
+    read -r maCD
+    maCD=$(echo "$maCD" | tr '[:lower:]' '[:upper:]')
 
-    if [ ! -s "$CD_FILE" ]; then
-        msg_warn "Chua co du lieu CD nao."
-        pause; return
-    fi
-
-    read -rp "Nhap ma CD can ban: " id
-    id=$(echo "$id" | tr '[:lower:]' '[:upper:]')
-
-    dong=$(grep "^${id}|" "$CD_FILE")
+    dong=$(grep "^${maCD}|" "$FILE_DATA")
     if [ -z "$dong" ]; then
-        msg_err "Khong tim thay CD co ma '${id}'!"
-        pause; return
+        echo "Khong tim thay CD co ma '$maCD'!"
+        return
     fi
 
-    ten_cd=$(echo "$dong" | cut -d'|' -f2)
-    gia_ban=$(echo "$dong" | cut -d'|' -f6)
-    ton_kho=$(echo "$dong" | cut -d'|' -f7)
+    # Thu tu cot: maCD|tenCD|tenTG|the_loai|gia|ds_bai_hat
+    tenCD=$(echo "$dong" | cut -d'|' -f2)
+    gia=$(echo "$dong" | cut -d'|' -f5)
 
-    echo -e "${CYAN}CD: ${BOLD}${ten_cd}${NC}"
-    echo -e "Gia ban: $(printf "%'.0f" "$gia_ban") VNĐ"
-    echo -e "Ton kho hien tai: ${ton_kho}"
+    echo "Ten CD : $tenCD"
+    echo "Gia ban: $gia VND"
 
     while true; do
-        read -rp "Nhap so luong can ban: " so_luong_ban
-        [[ "$so_luong_ban" =~ ^[0-9]+$ ]] && [ "$so_luong_ban" -gt 0 ] && break
-        msg_err "So luong phai la so nguyen duong!"
+        echo -n "Nhap so luong can ban: "
+        read -r so_luong
+        if [[ "$so_luong" =~ ^[0-9]+$ ]] && [ "$so_luong" -gt 0 ]; then
+            break
+        fi
+        echo "So luong phai la so nguyen duong!"
     done
 
-    if [ "$so_luong_ban" -gt "$ton_kho" ]; then
-        msg_err "So luong ban vuot qua ton kho hien tai!"
-        pause; return
-    fi
-
-    read -rp "Nhap ten khach hang: " ten_kh
+    echo -n "Nhap ten khach hang: "
+    read -r ten_kh
     if [ -z "$ten_kh" ]; then
-        msg_err "Ten khach hang khong duoc de trong!"
-        pause; return
+        echo "Ten khach hang khong duoc de trong!"
+        return
     fi
 
-    thanh_tien=$((gia_ban * so_luong_ban))
-    ton_kho_moi=$((ton_kho - so_luong_ban))
-    ma_hd=$(sinh_id_hoa_don)
+    thanh_tien=$((gia * so_luong))
+    ma_hd=$(sinh_ma_hoa_don)
     ngay_ban=$(date +"%d/%m/%Y")
 
-    cap_nhat_so_luong_cd "$id" "$ton_kho_moi"
-    echo "${ma_hd}|${ngay_ban}|${ten_kh}|${id}|${ten_cd}|${so_luong_ban}|${gia_ban}|${thanh_tien}" >> "$INVOICE_FILE"
+    echo "${ma_hd}|${ngay_ban}|${ten_kh}|${maCD}|${tenCD}|${so_luong}|${gia}|${thanh_tien}" >> "$INVOICE_FILE"
 
-    echo
-    msg_ok "Da ban thanh cong ${so_luong_ban} dia CD ${id}. Ma hoa don: ${ma_hd}"
-    pause
+    echo "Da ban thanh cong $so_luong dia CD $maCD. Ma hoa don: $ma_hd"
 }
 
-# ============================================================
-# i. IN HOA DON BAN HANG
-in_hoa_don_ban_hang() {
-    clear
-    double_line
-    echo -e "${BOLD}${BLUE}        IN HOA DON BAN HANG${NC}"
-    double_line
-
+# 5. HAM IN HOA DON BAN HANG
+in_hoa_don() {
     if [ ! -s "$INVOICE_FILE" ]; then
-        msg_warn "Chua co hoa don nao."
-        pause; return
+        echo "Chua co hoa don nao."
+        return
     fi
 
-    invoice_id="$1"
-    if [ -z "$invoice_id" ]; then
-        read -rp "Nhập mã hóa đơn cần in : " invoice_id
+    echo -n "Nhap ma hoa don can in (de trong = hoa don gan nhat): "
+    read -r ma_hd_can_in
+
+    if [ -z "$ma_hd_can_in" ]; then
+        ma_hd_can_in=$(tail -n 1 "$INVOICE_FILE" | cut -d'|' -f1)
     fi
 
-    if [ -z "$invoice_id" ]; then
-        invoice_id=$(awk -F'|' 'NF{last=$1} END{print last}' "$INVOICE_FILE")
-    fi
-
-    dong=$(grep "^${invoice_id}|" "$INVOICE_FILE")
+    dong=$(grep "^${ma_hd_can_in}|" "$INVOICE_FILE")
     if [ -z "$dong" ]; then
-        msg_err "Không tìm thấy hóa đơn '${invoice_id}'."
-        pause; return
+        echo "Khong tim thay hoa don '$ma_hd_can_in'."
+        return
     fi
 
-    IFS='|' read -r ma_hd ngay ten_kh id_cd ten_cd sl don_gia thanh_tien <<< "$dong"
-    clear
-    double_line
-    echo -e "${BOLD}${BLUE}               HOA DON BAN HANG${NC}"
-    double_line
-    echo -e "Ma hoa don  : ${BOLD}${ma_hd}${NC}"
-    echo -e "Ngay lap    : ${ngay}"
-    echo -e "Khach hang  : ${ten_kh}"
-    echo -e "Ma CD       : ${id_cd}"
-    echo -e "Ten CD      : ${ten_cd}"
-    echo -e "So luong    : ${sl}"
-    echo -e "Don gia     : $(printf "%'.0f" "$don_gia") VNĐ"
-    echo -e "Thanh tien  : $(printf "%'.0f" "$thanh_tien") VNĐ"
-    line
+    IFS='|' read -r ma_hd ngay ten_kh maCD tenCD so_luong gia thanh_tien <<< "$dong"
 
-    {
-        echo "============================================================"
-        echo "HOA DON BAN HANG: ${ma_hd}"
-        echo "Ngay lap    : ${ngay}"
-        echo "Khach hang  : ${ten_kh}"
-        echo "Ma CD       : ${id_cd}"
-        echo "Ten CD      : ${ten_cd}"
-        echo "So luong    : ${sl}"
-        echo "Don gia     : $(printf "%'.0f" "$don_gia") VNĐ"
-        echo "Thanh tien  : $(printf "%'.0f" "$thanh_tien") VNĐ"
-        echo "============================================================"
-        echo
-    } >> "$INVOICE_FILE"
-
-    msg_ok "Da ghi hoa don vao file invoices.txt."
-    pause
+    echo "=========================================="
+    echo "          HOA DON BAN HANG"
+    echo "=========================================="
+    echo "Ma hoa don : $ma_hd"
+    echo "Ngay lap   : $ngay"
+    echo "Khach hang : $ten_kh"
+    echo "Ma CD      : $maCD"
+    echo "Ten CD     : $tenCD"
+    echo "So luong   : $so_luong"
+    echo "Don gia    : $gia VND"
+    echo "Thanh tien : $thanh_tien VND"
+    echo "=========================================="
 }
+
+# 6. HIEN THI MENU CHINH
+menu_chinh() {
+    while true; do
+        echo "=== MENU BAN HANG ==="
+        echo "1. Ban CD"
+        echo "2. In hoa don ban hang"
+        echo "0. Thoat chuong trinh"
+        echo "--------------------------------------------------------"
+        echo -n "Nhap lua chon cua ban (0-2): "
+        read -r lua_chon
+        echo "--------------------------------------------------------"
+
+        # 7. XU LY LOGIC THEO LUA CHON
+        if ! [[ "$lua_chon" =~ ^[0-9]+$ ]]; then
+            echo "Lua chon khong hop le!"
+        elif [ "$lua_chon" -eq 1 ]; then
+            ban_cd
+        elif [ "$lua_chon" -eq 2 ]; then
+            in_hoa_don
+        elif [ "$lua_chon" -eq 0 ]; then
+            echo "Tam biet!"
+            exit 0
+        else
+            echo "Lua chon khong hop le!"
+        fi
+        echo
+    done
+}
+
+# 8. CHAY CHUONG TRINH
+menu_chinh
