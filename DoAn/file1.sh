@@ -75,6 +75,7 @@ ThemThongTinCD() {
 echo "-------------Chọn 1 trong 2-------------"
 echo "1.Thêm CD"
 echo "2.ThemThongTinCD"
+echo "0.Thoát chương trình"
 
 read Chon  #Nhập lựa chọn 1 hoặc 2
 
@@ -103,4 +104,14 @@ case $Chon in
         mv temp.txt file.txt
         echo "Cập nhật thông tin thành công."
     ;;
+
+    0)
+        echo "Đã thoát chương trình."
+        exit 0
+    ;;
+
+    *)
+        echo "Lựa chọn không hợp lệ."
+    ;;
+
 esac
