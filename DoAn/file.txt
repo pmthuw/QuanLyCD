@@ -1,4 +1,3 @@
-
 CD001|Sky Tour|Sơn Tùng M-TP|Nhạc Trẻ|250000|20|Lạc Trôi,Nơi Này Có Anh,Hãy Trao Cho Anh
 CD002|Anh Nhà Ở Đâu Thế|AMEE|Nhạc Trẻ|170000|15|Anh Nhà Ở Đâu Thế,Đen Đá Không Đường
 CD003|Nàng Thơ|Hoàng Dũng|Ballad|185000|17|Nàng Thơ
