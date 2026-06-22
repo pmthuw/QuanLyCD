@@ -56,10 +56,10 @@ ThemThongTinCD() {
     while true
         do
             echo "Hãy nhập số lượng tồn kho:"
-            read so_luong
+            read ton_kho
             
             #Cho phép số lượng phải là số thứ tự
-            if [[ "$so_luong" =~ ^[0-9]+$ ]]
+            if [[ "$ton_kho" =~ ^[0-9]+$ ]]
                 then echo "Số lượng hợp lệ."
             break
             else
@@ -71,47 +71,42 @@ ThemThongTinCD() {
     read ds_bai_hat
 }
 
-#Hiện thị Menu chọn 1 trong 2
-echo "-------------Chọn 1 trong 2-------------"
-echo "1.Thêm CD"
-echo "2.ThemThongTinCD"
-echo "0.Thoát chương trình"
+menu_file1() {
+    echo "-------------CHUC NANG QUAN LY CD-------------"
+    echo "1. Them CD"
+    echo "2. Them thong tin CD"
+    echo "0. Thoat"
 
-read Chon  #Nhập lựa chọn 1 hoặc 2
+    read -p "Nhap lua chon: " Chon
 
-#Menu chọn
-case $Chon in
-    1) 
-        ThemCD
-        echo "$maCD|$tenCD|$tenTG| | |" >> file.txt  # Lưu CD vào file.txt
-        echo "Đã lưu vào hệ thống."
-    ;;
+    case $Chon in
+        1)
+            ThemCD
+            echo "$maCD|$tenCD|$tenTG| | | |" >> file.txt
+            echo "Da luu vao he thong."
+        ;;
 
-    2) 
-        ThemThongTinCD
-        
-        #Lấy thông tin CD ở cột 2 và 3
-        tenCD=$(grep "^$maCD|" file.txt | cut -d "|" -f 2)
-        tenTG=$(grep "^$maCD|" file.txt | cut -d "|" -f 3)
+        2)
+            ThemThongTinCD
 
-        #Xóa dòng có mã đã nhập 
-        grep -v "^$maCD|" file.txt > temp.txt
+            tenCD=$(grep "^$maCD|" file.txt | cut -d "|" -f2)
+            tenTG=$(grep "^$maCD|" file.txt | cut -d "|" -f3)
 
-        #Tạo dòng có mã đã nhập và cập nhật thông tin đầy đủ
-        echo "$maCD|$tenCD|$tenTG|$the_loai|$gia|$so_luong|$ds_bai_hat" >> temp.txt
+            grep -v "^$maCD|" file.txt > temp.txt
 
-        #Đổi tên và cập nhật thành công
-        mv temp.txt file.txt
-        echo "Cập nhật thông tin thành công."
-    ;;
+            echo "$maCD|$tenCD|$tenTG|$the_loai|$gia|$ton_kho|$ds_bai_hat" >> temp.txt
 
-    0)
-        echo "Đã thoát chương trình."
-        exit 0
-    ;;
+            mv temp.txt file.txt
 
-    *)
-        echo "Lựa chọn không hợp lệ."
-    ;;
+            echo "Cap nhat thong tin thanh cong."
+        ;;
 
-esac
+        0)
+            return
+        ;;
+
+        *)
+            echo "Lua chon khong hop le."
+        ;;
+    esac
+}
