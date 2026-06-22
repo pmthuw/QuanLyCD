@@ -6,7 +6,7 @@ INVOICE_FILE="invoices.txt"
 # 2. KIEM TRA DIEU KIEN DAU VAO
 if [ ! -f "$FILE_DATA" ]; then
     echo "Loi: Khong tim thay file du lieu $FILE_DATA!"
-    exit 1
+    return 1
 fi
 if [ ! -s "$FILE_DATA" ]; then
     echo "-> Kho dang trong."
@@ -36,12 +36,14 @@ ban_cd() {
         return
     fi
 
-    # Thu tu cot: maCD|tenCD|tenTG|the_loai|gia|ds_bai_hat
+    # Thu tu cot: maCD|tenCD|tenTG|the_loai|gia|so_luong|ds_bai_hat
     tenCD=$(echo "$dong" | cut -d'|' -f2)
     gia=$(echo "$dong" | cut -d'|' -f5)
+    ton_kho=$(echo "$dong" | cut -d'|' -f6)
 
     echo "Ten CD : $tenCD"
     echo "Gia ban: $gia VND"
+    echo "Ton kho hien tai: $ton_kho"
 
     while true; do
         echo -n "Nhap so luong can ban: "
@@ -51,6 +53,12 @@ ban_cd() {
         fi
         echo "So luong phai la so nguyen duong!"
     done
+    
+    #Đặt hàng quá số lượng trong kho thì quay lại
+    if [ "$so_luong" -gt "$ton_kho" ]; then
+        echo "Khong du hang trong kho!"
+        return
+    fi
 
     echo -n "Nhap ten khach hang: "
     read -r ten_kh
@@ -60,12 +68,21 @@ ban_cd() {
     fi
 
     thanh_tien=$((gia * so_luong))
+    ton_kho_moi=$((ton_kho - so_luong))
     ma_hd=$(sinh_ma_hoa_don)
     ngay_ban=$(date +"%d/%m/%Y")
 
+    awk -F'|' -v OFS='|' -v id="$maCD" -v sl="$ton_kho_moi" '
+    $1==id {$6=sl}
+    {print}
+        ' "$FILE_DATA" > temp.txt
+
+    mv temp.txt "$FILE_DATA"
+    
     echo "${ma_hd}|${ngay_ban}|${ten_kh}|${maCD}|${tenCD}|${so_luong}|${gia}|${thanh_tien}" >> "$INVOICE_FILE"
 
     echo "Da ban thanh cong $so_luong dia CD $maCD. Ma hoa don: $ma_hd"
+    echo "Ton kho con lai: $ton_kho_moi"
 }
 
 # 5. HAM IN HOA DON BAN HANG
@@ -104,8 +121,8 @@ in_hoa_don() {
     echo "=========================================="
 }
 
-# 6. HIEN THI MENU CHINH
-menu_chinh() {
+# 6. HIEN THI MENU BÁN HÀNG
+menu_ban_hang() {
     while true; do
         echo "=== MENU BAN HANG ==="
         echo "1. Ban CD"
@@ -124,14 +141,10 @@ menu_chinh() {
         elif [ "$lua_chon" -eq 2 ]; then
             in_hoa_don
         elif [ "$lua_chon" -eq 0 ]; then
-            echo "Tam biet!"
-            exit 0
+            return
         else
             echo "Lua chon khong hop le!"
         fi
         echo
     done
 }
-
-# 8. CHAY CHUONG TRINH
-menu_chinh
