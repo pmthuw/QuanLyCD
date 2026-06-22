@@ -5,7 +5,7 @@ FILE_DATA="file.txt"
 # 2. KIEM TRA DIEU KIEN DAU VAO
 if [ ! -f "$FILE_DATA" ]; then
     echo "Loi: Khong tim thay file du lieu $FILE_DATA!"
-    exit 1
+    return 1
 fi
 if [ ! -s "$FILE_DATA" ]; then
     echo "-> Kho dang trong."
@@ -127,8 +127,8 @@ tim_cd_bai_hat() {
     fi
 }
 
-# 6. HIEN THI MENU CHINH
-menu_chinh() {
+# 6. HIEN THI MENU TIM KIEM
+menu_tim_kiem() {
     while true; do
         echo "=== MENU TIM KIEM CD ==="
         echo "1. Tim kiem CD theo the loai"
@@ -150,14 +150,10 @@ menu_chinh() {
         elif [ "$lua_chon" -eq 3 ]; then
             tim_cd_bai_hat
         elif [ "$lua_chon" -eq 0 ]; then
-            echo "Tam biet!"
-            exit 0
+            return
         else
             echo "Lua chon khong hop le!"
         fi
         echo
     done
 }
-
-# 8. CHAY CHUONG TRINH
-menu_chinh
